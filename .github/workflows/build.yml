@@ -9,20 +9,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Keiyoushi Extensions Source
+      - name: Checkout Viserion Repo (Current)
         uses: actions/checkout@v4
-
-      - name: Checkout User Viserion Repo (Custom Extension)
-        uses: actions/checkout@v4
-        with:
-          repository: 0verthinker-1/Viserion
-          token: ${{ secrets.GITHUB_TOKEN }}
-          path: user_extension
-
-      - name: Inject MegaHentai Extension
-        run: |
-          mkdir -p src/pt/megahentai/
-          cp -r user_extension/src/pt/megahentai/* src/pt/megahentai/
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -32,12 +20,24 @@ jobs:
 
       - name: Build MegaHentai Debug APK
         run: |
+          # Clona a base oficial da Keiyoushi para uma pasta temporária
+          git clone --depth 1 https://github.com/keiyoushi/extensions-source.git keiyoushi_base
+          
+          # Copia a tua extensão MegaHentai para dentro da estrutura da Keiyoushi
+          mkdir -p keiyoushi_base/src/pt/megahentai/
+          cp -r src/pt/megahentai/* keiyoushi_base/src/pt/megahentai/
+          
+          # Entra na pasta da base e compila apenas o MegaHentai em modo Debug
+          cd keiyoushi_base
           chmod +x gradlew
           ./gradlew :src:pt:megahentai:assembleDebug
+          
+          # Copia o APK gerado para a raiz do projeto para o upload o encontrar
+          find src/pt/megahentai/build/outputs/apk/ -name "*.apk" -exec cp {} ../ \;
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: MegaHentai-APK
-          path: 'src/pt/megahentai/build/outputs/apk/debug/*.apk'
+          path: '*.apk'
           
