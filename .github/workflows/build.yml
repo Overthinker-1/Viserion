@@ -12,33 +12,27 @@ jobs:
       - name: Checkout Viserion Repo
         uses: actions/checkout@v4
 
-      - name: Save MegaHentai extension temporarily
-        run: |
-          mkdir -p /tmp/megahentai
-          cp -r src/pt/megahentai/* /tmp/megahentai/
-
-      - name: Setup Keiyoushi Base Source
-        run: |
-          # Clona para uma pasta temporária isolada para evitar conflitos
-          git clone --depth 1 https://github.com/keiyoushi/extensions-source.git /tmp/keiyoushi
-          
-          # Copia toda a estrutura oficial para a raiz do workspace atual
-          cp -a /tmp/keiyoushi/. .
-
-      - name: Restore MegaHentai Extension
-        run: |
-          mkdir -p src/pt/megahentai/
-          cp -r /tmp/megahentai/* src/pt/megahentai/
-
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Import Keiyoushi Build Infrastructure
+        run: |
+          # Clona a base oficial para uma pasta temporária
+          git clone --depth 1 https://github.com/keiyoushi/extensions-source.git /tmp/keiyoushi_base
+          
+          # Copia os ficheiros e pastas essenciais de compilação para a raiz do Viserion
+          cp /tmp/keiyoushi_base/common.gradle ./
+          cp /tmp/keiyoushi_base/settings.gradle ./
+          cp -r /tmp/keiyoushi_base/build-logic ./
+          cp -r /tmp/keiyoushi_base/gradle ./
+          cp /tmp/keiyoushi_base/gradlew ./
+          chmod +x gradlew
+
       - name: Build MegaHentai Debug APK
         run: |
-          chmod +x gradlew
           ./gradlew :src:pt:megahentai:assembleDebug
 
       - name: Upload APK
