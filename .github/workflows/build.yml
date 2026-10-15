@@ -17,25 +17,26 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Build Extension Automatically
+      - name: Build Single Extension (Debug)
         run: |
-          # Clona uma base de extensões oficial e estável
-          git clone https://github.com/keiyoushi/extensions-source.git temp_repo
+          # Clona o repositório base oficial de forma rápida
+          git clone --depth 1 https://github.com/keiyoushi/extensions-source.git temp_repo
           
-          # Garante que a pasta de destino existe e copia o teu ficheiro MegaHentai.kt para lá
+          # Copia a tua extensão para dentro da estrutura clonada
           mkdir -p temp_repo/src/pt/megahentai/
-          cp src/pt/megahentai/MegaHentai.kt temp_repo/src/pt/megahentai/
+          cp -r src/pt/megahentai/* temp_repo/src/pt/megahentai/
           
-          # Entra na pasta do projeto base e compila a tua extensão específica
+          # Compila APENAS a tua extensão em modo Debug (sem exigir chaves de assinatura)
           cd temp_repo
+          chmod +x gradlew
           ./gradlew :src:pt:megahentai:assembleDebug
           
-          # Copia o APK gerado para a pasta principal
-          find . -name "*.apk" -exec cp {} ../ \;
+          # Copia o APK gerado para a raiz
+          find src/pt/megahentai/build/outputs/apk/ -name "*.apk" -exec cp {} ../ \;
 
-      - name: Upload APK Artifact
+      - name: Upload APK
         uses: actions/upload-artifact@v3
         with:
-          name: megahentai-apk
+          name: MegaHentai-APK
           path: '*.apk'
           
