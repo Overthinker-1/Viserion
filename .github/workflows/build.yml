@@ -12,21 +12,23 @@ jobs:
       - name: Checkout Viserion Repo
         uses: actions/checkout@v4
 
-      - name: Save MegaHentai files temporarily
+      - name: Save MegaHentai extension temporarily
         run: |
-          mkdir -p /tmp/ext
-          cp -r src/pt/megahentai/* /tmp/ext/
+          mkdir -p /tmp/megahentai
+          cp -r src/pt/megahentai/* /tmp/megahentai/
 
-      - name: Clone Keiyoushi Base to Workspace Root
+      - name: Setup Keiyoushi Base Source
         run: |
-          # Remove os ficheiros antigos do Viserion e clica a Keiyoushi diretamente na raiz (.)
-          rm -rf .git src
-          git clone --depth 1 https://github.com/keiyoushi/extensions-source.git .
+          # Clona para uma pasta temporária isolada para evitar conflitos
+          git clone --depth 1 https://github.com/keiyoushi/extensions-source.git /tmp/keiyoushi
+          
+          # Copia toda a estrutura oficial para a raiz do workspace atual
+          cp -a /tmp/keiyoushi/. .
 
-      - name: Inject MegaHentai Extension
+      - name: Restore MegaHentai Extension
         run: |
           mkdir -p src/pt/megahentai/
-          cp -r /tmp/ext/* src/pt/megahentai/
+          cp -r /tmp/megahentai/* src/pt/megahentai/
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
