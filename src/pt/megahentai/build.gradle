@@ -4,5 +4,3 @@ ext {
     extClass = ".MegaHentai"
     extVersionCode = 1
 }
-
-apply from: "$rootDir/common/build.gradle.kts"
