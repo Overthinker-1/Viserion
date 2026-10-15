@@ -12,32 +12,36 @@ jobs:
       - name: Checkout Viserion Repo
         uses: actions/checkout@v4
 
+      - name: Save MegaHentai files temporarily
+        run: |
+          mkdir -p /tmp/ext
+          cp -r src/pt/megahentai/* /tmp/ext/
+
+      - name: Clone Keiyoushi Base to Workspace Root
+        run: |
+          # Remove os ficheiros antigos do Viserion e clica a Keiyoushi diretamente na raiz (.)
+          rm -rf .git src
+          git clone --depth 1 https://github.com/keiyoushi/extensions-source.git .
+
+      - name: Inject MegaHentai Extension
+        run: |
+          mkdir -p src/pt/megahentai/
+          cp -r /tmp/ext/* src/pt/megahentai/
+
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Clone Keiyoushi Base & Build
+      - name: Build MegaHentai Debug APK
         run: |
-          # Clona a base oficial para uma pasta isolada (evita conflitos de diretório)
-          git clone --depth 1 https://github.com/keiyoushi/extensions-source.git keiyoushi_base
-          
-          # Copia a tua extensão do MegaHentai para dentro da estrutura clonada
-          mkdir -p keiyoushi_base/src/pt/megahentai/
-          cp -r src/pt/megahentai/* keiyoushi_base/src/pt/megahentai/
-          
-          # Entra na pasta da base e compila o MegaHentai em modo Debug
-          cd keiyoushi_base
           chmod +x gradlew
           ./gradlew :src:pt:megahentai:assembleDebug
-          
-          # Copia o APK gerado para a raiz principal para o upload o encontrar
-          find src/pt/megahentai/build/outputs/apk/ -name "*.apk" -exec cp {} ../ \;
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: MegaHentai-APK
-          path: '*.apk'
+          path: 'src/pt/megahentai/build/outputs/apk/debug/*.apk'
           
