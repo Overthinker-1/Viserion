@@ -18,25 +18,24 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Inspect Common Directory & Build
+      - name: Inject Extension & Build APK
         run: |
           # 1. Clona a base oficial da Keiyoushi
           git clone --depth 1 https://github.com/keiyoushi/extensions-source.git keiyoushi_base
           
-          # 2. Mostra os ficheiros exatos dentro da pasta common
-          echo "=== CONTEÚDO DA PASTA COMMON ==="
-          ls -la keiyoushi_base/common/
-          
-          # 3. Copia a tua extensão do MegaHentai para dentro da estrutura oficial
+          # 2. Copia a tua extensão para a estrutura oficial
           mkdir -p keiyoushi_base/src/pt/megahentai/
           cp -r src/pt/megahentai/* keiyoushi_base/src/pt/megahentai/
           
-          # 4. Compila a extensão em modo Debug
+          # 3. Adiciona explicitamente a extensão ao settings.gradle.kts para o Gradle reconhecer a task
+          echo 'include(":src:pt:megahentai")' >> keiyoushi_base/settings.gradle.kts
+          
+          # 4. Compila o APK da extensão em modo Debug
           cd keiyoushi_base
           chmod +x gradlew
-          ./gradlew :src:pt:megahentai:assembleDebug
+          ./gradlew :src:pt:megahentai:assembleDebug --stacktrace
           
-          # 5. Copia o APK gerado para a raiz
+          # 5. Copia o APK gerado para a raiz do espaço de trabalho
           find src/pt/megahentai/build/outputs/apk/ -name "*.apk" -exec cp {} ../ \;
 
       - name: Upload APK
