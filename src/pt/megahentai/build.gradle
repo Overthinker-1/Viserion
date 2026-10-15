@@ -5,4 +5,4 @@ ext {
     extVersionCode = 1
 }
 
-apply from: "$rootDir/common/common.gradle.kts"
+apply from: "$rootDir/common/build.gradle.kts"
