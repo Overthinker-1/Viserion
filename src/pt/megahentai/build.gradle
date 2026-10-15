@@ -5,4 +5,4 @@ ext {
     extVersionCode = 1
 }
 
-apply from: "$rootProject.projectDir/common.gradle"
+apply from: "$rootDir/common.gradle"
