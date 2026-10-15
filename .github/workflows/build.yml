@@ -18,7 +18,7 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Inject Extension & Build APK
+      - name: Build MegaHentai Debug APK (Isolated)
         run: |
           # 1. Clona a base oficial da Keiyoushi
           git clone --depth 1 https://github.com/keiyoushi/extensions-source.git keiyoushi_base
@@ -27,15 +27,17 @@ jobs:
           mkdir -p keiyoushi_base/src/pt/megahentai/
           cp -r src/pt/megahentai/* keiyoushi_base/src/pt/megahentai/
           
-          # 3. Adiciona explicitamente a extensão ao settings.gradle.kts para o Gradle reconhecer a task
-          echo 'include(":src:pt:megahentai")' >> keiyoushi_base/settings.gradle.kts
-          
-          # 4. Compila o APK da extensão em modo Debug
+          # 3. Entra na pasta e configura o settings.gradle.kts para carregar APENAS o MegaHentai
           cd keiyoushi_base
-          chmod +x gradlew
-          ./gradlew :src:pt:megahentai:assembleDebug --stacktrace
           
-          # 5. Copia o APK gerado para a raiz do espaço de trabalho
+          # Desativa o carregamento em massa e ativa o carregamento isolado da tua extensão
+          sed -i 's/loadAllIndividualExtensions()/\/\/ loadAllIndividualExtensions()\n    loadIndividualExtension("pt", "megahentai")/' settings.gradle.kts
+          
+          # 4. Compila utilizando a task de Debug padrão (agora direcionada apenas para a tua extensão isolada)
+          chmod +x gradlew
+          ./gradlew assembleDebug
+          
+          # 5. Copia o APK gerado para a raiz do workspace para o upload o encontrar
           find src/pt/megahentai/build/outputs/apk/ -name "*.apk" -exec cp {} ../ \;
 
       - name: Upload APK
