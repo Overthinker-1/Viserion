@@ -18,21 +18,25 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Build MegaHentai Debug APK
+      - name: Clone, Inspect & Build MegaHentai
         run: |
-          # 1. Clona a base oficial da Keiyoushi para uma pasta dedicada
+          # 1. Clona a base oficial da Keiyoushi
           git clone --depth 1 https://github.com/keiyoushi/extensions-source.git keiyoushi_base
           
-          # 2. Copia a pasta da tua extensão do MegaHentai para dentro da estrutura oficial
+          # 2. Diagnóstico: Mostra os ficheiros existentes na raiz clonada para confirmar o common.gradle
+          echo "=== CONTEÚDO DA RAIZ DA KEIYOUSHI ==="
+          ls -la keiyoushi_base
+          
+          # 3. Copia a tua extensão do MegaHentai para dentro da estrutura oficial
           mkdir -p keiyoushi_base/src/pt/megahentai/
           cp -r src/pt/megahentai/* keiyoushi_base/src/pt/megahentai/
           
-          # 3. Entra na pasta oficial e compila lá dentro (o rootDir reconhece o common.gradle nativamente)
+          # 4. Entra na pasta e compila em modo Debug
           cd keiyoushi_base
           chmod +x gradlew
           ./gradlew :src:pt:megahentai:assembleDebug
           
-          # 4. Copia o APK gerado para a raiz do workspace para o upload o detetar
+          # 5. Copia o APK gerado para a raiz do repositório para o upload
           find src/pt/megahentai/build/outputs/apk/ -name "*.apk" -exec cp {} ../ \;
 
       - name: Upload APK
