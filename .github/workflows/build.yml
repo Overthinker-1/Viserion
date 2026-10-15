@@ -9,33 +9,34 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
       - name: Build Single Extension (Debug)
         run: |
-          # Clona o repositório base oficial de forma rápida
+          # Clona o repositório base oficial
           git clone --depth 1 https://github.com/keiyoushi/extensions-source.git temp_repo
           
-          # Copia a tua extensão para dentro da estrutura clonada
+          # Copia a pasta da tua extensão para a estrutura clonada
           mkdir -p temp_repo/src/pt/megahentai/
           cp -r src/pt/megahentai/* temp_repo/src/pt/megahentai/
           
-          # Compila APENAS a tua extensão em modo Debug (sem exigir chaves de assinatura)
+          # Compila o MegaHentai em modo Debug
           cd temp_repo
           chmod +x gradlew
           ./gradlew :src:pt:megahentai:assembleDebug
           
           # Copia o APK gerado para a raiz
-          find src/pt/megahentai/build/outputs/apk/ -name "*.apk" -exec cp {} ../ \;
+          find . -name "*.apk" -exec cp {} ../ \;
 
       - name: Upload APK
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: MegaHentai-APK
           path: '*.apk'
